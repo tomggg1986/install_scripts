@@ -21,21 +21,21 @@ check_command() {
 
 # Detect architecture and choose appropriate Neovim asset
 check_architecture() {
-ARCH="$(uname -m)"
-case "$ARCH" in
+   ARCH="$(uname -m)"
+   case "$ARCH" in
 	x86_64|amd64)
-		NVIM_ASSET="x86_64"
+		echo "x86_64"
 		;;
 	aarch64|arm64)
-		NVIM_ASSET="arm64"
+		echo "arm64"
 		;;
 	armv7l|armv7)
 		NVIM_ASSET="armv7l"
 		;;
 	*)
 		echo "⚠️  Unknown architecture: $ARCH. Falling back to x86_64 asset."
-		NVIM_ASSET="x86_64"
+		echo "x86_64"
 		;;
-esac;;
+
     esac
 }

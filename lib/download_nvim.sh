@@ -11,12 +11,13 @@ echo "=== download_nvim.sh ==="
 
 # 1️⃣ Variables
 NVIM_DIR="/usr/local/nvim"
-NVIM_BIN_DIR="$NVIM_DIR/bin"
+NVIM_BIN_DIR="/usr/local/bin"
 EXTENSION="tar.gz"
 
 NVIM_ASSET=$(check_architecture)
-FILE_NAME="nvim-linux-$NVIM_ASSET.$EXTENSION"
-NVIM_RELEASE_URL="https://github.com/neovim/neovim/releases/latest/download/$FILE_NAME"
+FILE_NAME="nvim-linux-$NVIM_ASSET"
+FILE_NAME_TAR="$FILE_NAME.$EXTENSION"
+NVIM_RELEASE_URL="https://github.com/neovim/neovim/releases/latest/download/$FILE_NAME_TAR"
 TMP_TAR="/tmp/$FILE_NAME"
 
 # 2️⃣ Create directories if missing
@@ -26,7 +27,7 @@ echo "⬇️  Downloading latest Neovim..."
 curl -L "$NVIM_RELEASE_URL" -o "$TMP_TAR"
 
 echo "📦 Extracting Neovim..."
-tar xzf "$TMP_TAR" -C "$NVIM_DIR"
+sudo tar xzf "$TMP_TAR" -C "$NVIM_DIR"
 
 if [ -z "$NVIM_DIR" ]; then
 	echo "❌ Could not find extracted Neovim directory under $NVIM_DIR"
@@ -36,7 +37,7 @@ fi
 # 5️⃣ Ensure symlink exists
 echo "🔗 Updating symlink..."
 EXTRACTED_DIR="$NVIM_DIR/$FILE_NAME"
-ln -sf "$EXTRACTED_DIR/bin/nvim" "$NVIM_BIN_DIR/nvim"
+sudo ln -sf "$EXTRACTED_DIR/bin/nvim" "$NVIM_BIN_DIR/nvim"
 
 # 6️⃣ Clean up
 rm -f "$TMP_TAR"
