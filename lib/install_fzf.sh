@@ -3,7 +3,7 @@
 # Enhanced fzf installation script with better error handling
 set -e
 
-echo "=== fzf Installation Script ==="
+echo -e "=== fzf Installation Script ===\n"
 
 FZF_DIR="$USER_HOME/.fzf"
 
@@ -47,7 +47,7 @@ else
     exit 1
 fi
 
-echo "=== Installation Complete ==="
 echo "fzf has been installed to $FZF_DIR"
+echo -e "=== Installation Complete ===\n"
 
 

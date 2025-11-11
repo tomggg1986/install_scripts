@@ -19,6 +19,14 @@ check_command() {
     fi
 }
 
+is_installed() {
+    if command -v "$1" &> /dev/null; then
+        return 0  # success
+    else
+        return 1  # failure
+    fi
+}
+
 # Detect architecture and choose appropriate Neovim asset
 check_architecture() {
    ARCH="$(uname -m)"
@@ -38,4 +46,70 @@ check_architecture() {
 		;;
 
     esac
+}
+
+#download: Download a file from a URL to a specified location in /tmp
+downloadTMP(){
+    echo "Downloading $1 to $2"
+    curl -L "$1" -o "/tmp/$2"
+}
+
+#tarTMP: Extract a tar.gz file from /tmp to a specified directory
+tarTMP(){
+    echo "Extracting /tmp/$1 to $2"
+    sudo chmod +x "/tmp/$1"    
+    sudo tar xzf "/tmp/$1" -C "$2"
+    # 6️⃣ Clean up
+    rm -f "/tmp/$1"
+}
+
+# Detect Linux distribution and choose package manager
+detect_pkg_manager() {
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        distro_id=${ID,,}
+    elif command -v lsb_release >/dev/null 2>&1; then
+        distro_id=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    else
+        echo "Cannot determine Linux distribution."
+        return 1
+    fi
+
+    case "$distro_id" in
+        ubuntu|debian|kali|raspbian)
+            pkg_mgr="apt"
+            ;;
+        fedora)
+            pkg_mgr="dnf"
+            ;;
+        centos|rhel|rocky|almalinux|ol)
+            if command -v dnf >/dev/null 2>&1; then
+                pkg_mgr="dnf"
+            else
+                pkg_mgr="yum"
+            fi
+            ;;
+        opensuse*|sles)
+            pkg_mgr="zypper"
+            ;;
+        arch|manjaro|endeavouros)
+            pkg_mgr="pacman"
+            ;;
+        alpine)
+            pkg_mgr="apk"
+            ;;
+        gentoo)
+            pkg_mgr="emerge"
+            ;;
+        void)
+            pkg_mgr="xbps-install"
+            ;;
+        *)
+            echo "Unknown distribution: $distro_id"
+            return 1
+            ;;
+    esac
+
+    echo "$pkg_mgr"
+    return 0
 }
