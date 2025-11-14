@@ -5,30 +5,43 @@ set -e
 
 echo -e "=== nvim_config Installation Script ===\n"
 
-echo "Install Lua if not already installed."
+# Install Lua
 if is_installed lua; then
     echo "Lua is already installed."
 else
     echo "Installing Lua..."
-    downloadTMP "https://www.lua.org/ftp/lua-5.4.6.tar.gz" "lua-5.4.6.tar.gz"
-    tarTMP "lua-5.4.6.tar.gz" "$LOCAL_SRC"
-    ( cd "$LOCAL_SRC/lua-5.4.6" && sudo make all test  && sudo ln -sf $LOCAL_SRC/lua-5.4.6/src/lua $LOCAL_BIN/lua && sudo ln -sf $LOCAL_SRC/lua-5.4.6/src/lua.h $LOCAL_INCLUDE/lua.h)    
+    LUA="lua-5.4.6"
+    LUA_TAR="$LUA.tar.gz"
+    downloadTMP "https://www.lua.org/ftp/$LUA_TAR" "$LUA_TAR"
+    tarTMP "$LUA_TAR" "$LOCAL_SRC"
+    ( cd "$LOCAL_SRC/$LUA" && sudo make all test  && sudo ln -sf $LOCAL_SRC/$LUA/src/lua $LOCAL_BIN/lua && sudo ln -sf $LOCAL_SRC/$LUA/src/lua.h $LOCAL_INCLUDE/lua.h)    
 fi
 
-echo "Install luarocks and dependencies before running this script."
-LUA_ROCKS="luarocks-3.12.2.tar.gz"
-LUA_ROCKS_DIR="/tmp/luarocks-3.12.2"
+# Install Luarocks
+if is_installed luarocks; then
+    echo "Luarocks is already installed."
+else
+    echo "Installing Luarocks and dependencies..."
+    LUA_ROCKS_TAR="luarocks-3.12.2.tar.gz"
+    LUA_ROCKS_DIR="/tmp/luarocks-3.12.2"
+    downloadTMP "https://luarocks.org/releases/$LUA_ROCKS_TAR" "${LUA_ROCKS_TAR}"
+    tarTMP "${LUA_ROCKS_TAR}" "/tmp" 
+    ( cd "$LUA_ROCKS_DIR" && ./configure && make && sudo make install )
+fi
 
-downloadTMP "https://luarocks.org/releases/luarocks-3.12.2.tar.gz" "${LUA_ROCKS}"
-tarTMP "${LUA_ROCKS}" "/tmp" 
+# Install additional packages
+distro=$(getDistroID -v)
+if [[ "$distro" == "centos10" ]]; then
+    echo "This is CentOS"
+    sudo dnf config-manager --set-enabled crb
+    sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+fi
 
-( cd "$LUA_ROCKS_DIR" && ./configure && make && sudo make install )
-#sudo luarocks install luasocket 
+installPackage "ripgrep"
+installPackage "fd-find"
 
 TARGET_DIR="$USER_HOME/.config/nvim"
 REPO_URL="https://github.com/tomggg1986/nvim_config.git"
-
-echo "Target directory: $TARGET_DIR"
 
 # Handle existing directory
 if [ -d "$TARGET_DIR" ]; then

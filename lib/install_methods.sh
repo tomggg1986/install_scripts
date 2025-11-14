@@ -65,16 +65,7 @@ tarTMP(){
 
 # Detect Linux distribution and choose package manager
 detect_pkg_manager() {
-    if [ -f /etc/os-release ]; then
-        . /etc/os-release
-        distro_id=${ID,,}
-    elif command -v lsb_release >/dev/null 2>&1; then
-        distro_id=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
-    else
-        echo "Cannot determine Linux distribution."
-        return 1
-    fi
-
+    distro_id=$(getDistroID)
     case "$distro_id" in
         ubuntu|debian|kali|raspbian)
             pkg_mgr="apt"
@@ -112,4 +103,42 @@ detect_pkg_manager() {
 
     echo "$pkg_mgr"
     return 0
+}
+
+getDistroID() {
+    if [[ "$1" == "-v" ]]; then
+        show_version=true
+    else
+        show_version=false
+    fi
+    
+    if [ -f /etc/os-release ]; then
+        . /etc/os-release
+        distro_id=${ID,,}
+        version=${VERSION_ID}
+    elif command -v lsb_release >/dev/null 2>&1; then
+        distro_id=$(lsb_release -si | tr '[:upper:]' '[:lower:]')
+    else
+        echo "Cannot determine Linux distribution."
+        return 1
+    fi
+    
+    
+    if $show_version; then
+        echo "$distro_id$version"
+    else
+        echo "$distro_id"
+    fi
+
+    return 0
+}
+
+installPackage(){
+    if is_installed $1; then
+    echo "$1 is already installed."
+else
+    echo "Installing $1..."
+    sudo $P_MANAGER install -y $1
+fi
+
 }
