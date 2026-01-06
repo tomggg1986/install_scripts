@@ -6,7 +6,7 @@ ORACLE_BASE="/opt/oracle"
 ORACLE_HOME="$ORACLE_BASE/product/19.3.0/dbhome_1"
 SYSCTL_FILE="/etc/sysctl.d/98-oracle.conf"
 LIMITS_FILE="/etc/security/limits.d/oracle-database-preinstall-19c.conf"
-ORACLE_DIR="/opt/oracle/product/19.3.0/dbhome_1"
+ORACLE_DIR="/opt/oracle"
 ### ------------------------
 
 # -------- Parse arguments --------
