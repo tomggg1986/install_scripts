@@ -9,6 +9,8 @@ LIMITS_FILE="/etc/security/limits.d/oracle-database-preinstall-19c.conf"
 ORACLE_DIR="/opt/oracle"
 ### ------------------------
 
+echo "Starting Oracle 19c system preparation..."
+
 # -------- Parse arguments --------
 while getopts "u:" opt; do
   case $opt in
@@ -89,7 +91,7 @@ $ORA_USER   hard    fsize   unlimited
 EOF
 
 # -------- Create Oracle home --------
-mkdir -p "$ORACLE_DIR"
+mkdir -p "$ORACLE_HOME"
 chown -R "$ORA_USER:oinstall" "$ORACLE_DIR"
 chmod -R 775 "$ORACLE_DIR"
 
