@@ -1,0 +1,12 @@
+[Unit]
+Description=Oracle databases service
+After=network.target oracle_network.service
+ 
+[Service]
+Type=forking
+ExecStart=/opt/oracle/product/19.3.0/dbhome_1/bin/dbstart /opt/oracle/product/19.3.0/dbhome_1
+ExecStop=/opt/oracle/product/19.3.0/dbhome_1/bin/dbshut /opt/oracle/product/19.3.0/dbhome_1
+User=wcadmin
+ 
+[Install]
+WantedBy=multi-user.target

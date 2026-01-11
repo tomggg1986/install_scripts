@@ -30,12 +30,16 @@ while getopts "u:v:p:" opt; do
 done
 
 ### -------- CONFIG --------
+ORACLE_SID="wind"
 BASE_DIR="/opt"
 ORACLE_INVERTORY="$BASE_DIR/oraInventory"
 ORACLE_BASE="$BASE_DIR/oracle"
 ORACLE_HOME="$ORACLE_BASE/product/$ORA_VERSION/dbhome_1"
 SYSCTL_FILE="/etc/sysctl.d/98-oracle.conf"
 LIMITS_FILE="/etc/security/limits.d/oracle-database-preinstall-19c.conf"
+
+SERVICE_NAME="oracle${ORA_VERSION//./_}"
+SERVICE_FILE="/etc/systemd/system/${SERVICE_NAME}.service"
 ### ------------------------
 
 echo "-----------------------------------------------------------------"
@@ -149,11 +153,51 @@ grep -q "ORACLE_BASE=" "$BASHRC" || cat >> "$BASHRC" <<EOF
 export ORACLE_BASE=$ORACLE_BASE
 export ORACLE_HOME=\$ORACLE_BASE/product/19.3.0/dbhome_1
 export ORACLE_LISTNER=LISTENER
-export ORACLE_SID=wind
+export ORACLE_SID=$ORACLE_SID
 export ORACLE_COMMANDS=\$ORACLE_HOME/bin
 export LD_LIBRARY_PATH=\$ORACLE_HOME/lib:\$LD_LIBRARY_PATH
 export PATH=\$ORACLE_HOME/bin:\$PATH
 EOF
+
+echo "--- Creating systemd service for Oracle database ---"
+cat > "$SERVICE_FILE" <<EOF
+[Unit]
+Description=Oracle Database Service
+After=network.target
+
+[Service]
+Type=forking
+User=${ORA_USER}
+Group=${ORA_GROUP}
+Environment=ORACLE_HOME=${ORACLE_HOME}
+Environment=ORACLE_BASE=${ORACLE_BASE}
+Environment=ORACLE_SID=${ORACLE_SID}
+
+ExecStart=/bin/bash -c "\
+${ORACLE_HOME}/bin/lsnrctl start && \
+echo 'startup;' | ${ORACLE_HOME}/bin/sqlplus / as sysdba && \
+echo 'alter pluggable database all open;' | ${ORACLE_HOME}/bin/sqlplus / as sysdba"
+
+ExecStop=/bin/bash -c "\
+echo 'shutdown immediate;' | ${ORACLE_HOME}/bin/sqlplus / as sysdba && \
+${ORACLE_HOME}/bin/lsnrctl stop"
+
+TimeoutStartSec=300
+Restart=no
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+chmod 644 "$SERVICE_FILE"
+systemctl daemon-reload
+systemctl enable "$SERVICE_NAME"
+
+echo "--- Service created: $SERVICE_FILE ---"
+
+echo "--- Opening firewall port 1521 for Oracle listener ---"
+firewall-cmd --permanent --add-port=1521/tcp
+firewall-cmd --reload
 
 echo "--- Fake supported OS version for Oracle installation ---"
 export CV_ASSUME_DISTID=RHEL9
