@@ -140,6 +140,9 @@ chmod -R 775 "$ORACLE_INVERTORY"
 if [[ -n "$ORA_ZIP_PATH" ]]; then
   echo "--- Unzipping Oracle software from $ORA_ZIP_PATH to $ORACLE_HOME ---"
   su - "$ORA_USER" -c "unzip -oq $ORA_ZIP_PATH -d $ORACLE_HOME"
+  echo "--- Setting ownership and permissions for $ORACLE_BASE after unzip ---"
+  chown -R "$ORA_USER:$ORA_GROUP" "$ORACLE_BASE"
+  chmod -R 775 "$ORACLE_BASE"
 else
   echo "--- No Oracle zip path provided, skipping unzip step ---"
 fi

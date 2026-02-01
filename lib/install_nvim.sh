@@ -34,13 +34,13 @@ distro=$(getDistroID -v)
 if [[ "$distro" == "centos10" ]]; then
     echo "This is $distro"
     sudo dnf config-manager --set-enabled crb
-    sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+    sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
 fi
 
 #for oracle linux todo add also for rocky linux use correct version of epel
-if [[ "$distro" =~ ^ol.*$ ]]; then
+if [[ "$distro" =~ ^ol.*$ || "$distro" =~ ^rocky.*$ ]]; then
     echo "This is $distro"
-    sudo dnf install https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
+    sudo dnf install -y https://dl.fedoraproject.org/pub/epel/epel-release-latest-9.noarch.rpm
 fi
 
 installPackage "ripgrep"
