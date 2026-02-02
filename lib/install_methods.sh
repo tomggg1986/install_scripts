@@ -142,3 +142,24 @@ else
 fi
 
 }
+
+is_container_running(){
+    CONTAINER_NAME="$1"
+
+    # Check if container exists (running or stopped)
+    if docker ps -a --format '{{.Names}}' | grep -wq "$CONTAINER_NAME"; then
+        echo "Container '$CONTAINER_NAME' exists."
+
+        # Check if it is running
+        if docker ps --format '{{.Names}}' | grep -wq "$CONTAINER_NAME"; then
+            echo "Container '$CONTAINER_NAME' is RUNNING."
+            exit 0
+        else
+            echo "Container '$CONTAINER_NAME' exists but is STOPPED."
+            exit 1
+        fi
+    else
+        echo "Container '$CONTAINER_NAME' does NOT exist."
+        exit 2
+    fi
+}
