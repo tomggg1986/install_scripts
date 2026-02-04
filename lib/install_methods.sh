@@ -147,19 +147,27 @@ is_container_running(){
     CONTAINER_NAME="$1"
 
     # Check if container exists (running or stopped)
-    if docker ps -a --format '{{.Names}}' | grep -wq "$CONTAINER_NAME"; then
-        echo "Container '$CONTAINER_NAME' exists."
-
+    if sudo docker ps -a --format '{{.Names}}' | grep -wq "$CONTAINER_NAME"; then
+        #echo "Container '$CONTAINER_NAME' exists."
         # Check if it is running
-        if docker ps --format '{{.Names}}' | grep -wq "$CONTAINER_NAME"; then
-            echo "Container '$CONTAINER_NAME' is RUNNING."
-            exit 0
+        if sudo docker ps --format '{{.Names}}' | grep -wq "$CONTAINER_NAME"; then
+            #echo "Container '$CONTAINER_NAME' is RUNNING."
+            return 0
         else
-            echo "Container '$CONTAINER_NAME' exists but is STOPPED."
-            exit 1
+            #echo "Container '$CONTAINER_NAME' exists but is STOPPED."
+            return 1
         fi
     else
-        echo "Container '$CONTAINER_NAME' does NOT exist."
-        exit 2
+        #echo "Container '$CONTAINER_NAME' does NOT exist."
+        return 1
+    fi
+}
+
+image_exists() {
+    local image_name="$1"
+    if sudo docker images --format "table {{.Repository}}:{{.Tag}}" | grep -q "^${image_name}$"; then
+        return 0  # true - image exists
+    else
+        return 1  # false - image doesn't exist
     fi
 }
